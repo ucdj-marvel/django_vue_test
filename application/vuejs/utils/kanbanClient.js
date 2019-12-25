@@ -1,5 +1,6 @@
 // APIにアクセスするユーティリティ(API Client)
-import axios from 'axios'; // javascriptのHTTPClientライブラリ
+// javascriptのHTTPClientライブラリ
+import axios from 'axios';
 import { loadProgressBar } from 'axios-progress-bar';
 import camelcaseKeys from 'camelcase-keys';
 
@@ -48,6 +49,12 @@ class KanbanClient extends Client {
   async getAccountInfo() {
     const response = await this._get(`${this.baseUrl}/accounts/`);
     return response.data.accountInfo;
+  }
+
+  // Boardの一覧取得
+  async getBoardList() {
+    const response = await this._get(`${this.baseUrl}/boards/`);
+    return response.data.boardList;
   }
 }
 // getAccountInfoを呼び出すと/api/accounts/にアクセスし

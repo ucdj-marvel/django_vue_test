@@ -17,7 +17,7 @@ const actions = {
   // accountInfoに値をセットするには、作成したKanbanClient(APIClient)のgetAccountInfoを実行すれば良い
   async fetchAccountInfo({ commit }) {
     const accountInfo = await KanbanClient.getAccountInfo();
-    commit('setAccountInfo', accountInfo);  // mutationsの関数
+    commit('setAccountInfo', accountInfo);
   },
 };
 

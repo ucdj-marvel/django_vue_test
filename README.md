@@ -7,3 +7,14 @@ django-vue-template
 * Vue
 * Vuex
 * vuecli 3
+
+### 構築
+-------------------
+touch .env
+vim .env
+edit → DJANGO_ENV
+
+docker-compose up -d
+docker-compose exec service python manage.py createsuperuser
+docker-compose exec service python manage.py makemigrations kanban
+docker-compose exec service python manage.py migrate
