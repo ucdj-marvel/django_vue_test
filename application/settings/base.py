@@ -137,3 +137,13 @@ LOGOUT_REDIRECT_URL = '/'
 
 # ASGIの起点を指定
 ASGI_APPLICATION = 'views.routing.application'
+
+# バックエンドをRedisにする
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('redis', 6379)],
+        },
+    },
+}

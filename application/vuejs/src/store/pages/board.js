@@ -34,12 +34,17 @@ const actions = {
       pipeLineId,
       cardIdList: cardList.map(x => x.cardId),
     });
+    commit('updateCardOrder', { pipeLineId, cardList });
   },
 };
 
 // Consumerから戻されたボードのデータをしまうためのstate.boardDataと
 // 値をセットするためのsetBoardData mutationを定義
 const mutations = {
+  updateCardOrder(state, { pipeLineId, cardList }) { // あるPipeLine内の並びだけ更新する
+    const targetPipeLine = state.boardData.pipeLineList.find(pipeLine => pipeLine.pipeLineId === pipeLineId);
+    targetPipeLine.cardList = cardList;
+  },
   setBoardData(state, { boardData }) {
     // Pythonから来たデータをCamelCaseに変換
     state.boardData = camelcaseKeys(boardData, { deep: true });

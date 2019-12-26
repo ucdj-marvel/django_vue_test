@@ -1,3 +1,4 @@
+from asgiref.sync import async_to_sync
 from channels.generic.websocket import JsonWebsocketConsumer
 
 from modules.kanban import service as kanban_sv
@@ -20,6 +21,7 @@ class KanbanConsumer(JsonWebsocketConsumer):
         self.action_map = {
             'update_card_order': self.update_card_order
         }
+        self.room_group_name = None
 
     def connect(self):
         # 認証チェック
@@ -32,12 +34,19 @@ class KanbanConsumer(JsonWebsocketConsumer):
         self.board_id = self.scope['url_route']['kwargs']['board_id']
         # 接続を受け入れる
         self.accept()
+        # channel layerの初期化
+        self.room_group_name = 'board_id_{}'.format(self.board_id)
+        # ボード毎のグループに参加
+        async_to_sync(self.channel_layer.group_add)(
+            self.room_group_name,
+            self.channel_name
+        )
         # 初期データをクライアントに返送
         self.send_board_data()
 
     # 取得したボードの構成情報をクライアントに戻すメソッド
     # connect内で呼び出す
-    def send_board_data(self):
+    def send_board_data(self, event=None, *args, **kwargs):
         board_data = kanban_sv.get_board_data_by_board_id(self.board_id)
         # VueNativeWebsocketではmutation: xxxや
         # action: xxx というデータが含まれたメッセージがWebsocketに来た場合
@@ -62,7 +71,13 @@ class KanbanConsumer(JsonWebsocketConsumer):
         pipe_line_id = content['pipeLineId']
         card_id_list = content['cardIdList']
         kanban_sv.update_card_order(pipe_line_id, card_id_list)
-        self.send_board_data()
+        # 同じroom_group_nameに所属しているConsumerすべてにsend_board_dataを呼び出させる
+        async_to_sync(self.channel_layer.group_send)(
+            self.room_group_name,
+            {
+                'type': 'send_board_data',
+            }
+        )
 
     # メッセージ内のtypeに該当するものを直接呼び出し
     # 未定義のtypeを受け取った場合は例外を送出
