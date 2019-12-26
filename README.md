@@ -57,9 +57,9 @@ rm -rf node_modules package-lock.json && npm install
 ##### カードの並び順の更新流れ
 
 1. Component_vuejs/src/store/pages/boards.py_から`updateCardOrder(action)`を呼び出し
-1. ( _vies/ws/kanban_consumer.py_ ) Websocket経由で情報の更新をサーバにリクエスト
+1. ( ___vies/ws/kanban_consumer.py___ ) Websocket経由で情報の更新をサーバにリクエスト
 1. サーバ側がWebsocketで新しいカードの並び順(正確にばボード全体のデータ)を返送し
-1. ( _vuejs/src/store/pages/boards.py_ ) `setBoardData(mutation)`が実行される
+1. ( ___vuejs/src/store/pages/boards.py___ ) `setBoardData(mutation)`が実行される
   - Component側で、D&Dが完了するのは1.だが、新しい並び順になるのは4.まで完了した時点
     - そのため、その間はD&Dが完了しても、その前のデータがレンダリングされてしまうのでチラツキが発生
     - Websocketではサーバが次のメッセージを戻すまで待つといったことができない
@@ -82,18 +82,18 @@ rm -rf node_modules package-lock.json && npm install
 Channelsでブラウザをまたがってメッセージの送受信をするにはChannelLayerというコンポーネントを使用
 Websocketの接続ごとに生成されるConsumerインスタンスはChannelLayerを通じて相互にメッセージ受信ができるようになる
 1. ChannelLayerを有効化にする
-  - `CHANNEL_LAYERS`をsettingsに追加(バックエンドをRedisにする)
+    - `CHANNEL_LAYERS`をsettingsに追加(バックエンドをRedisにする)
 1. ConsumerにChannelLayerの初期化を追加
-  - ( _views/ws/kanban_consumer.py_ ) Consumerが初期化されるタイミングで、ConsumerをChannelLayerに追加
-  - ChannelLayerは、チャットにおけるルームのような概念で、どのルームに所属するかを指定して初期化
-  - URLに含まれている`board_id`をルーム名として使って`group_add`を行う
-  - ChannelLayer関連の処理は非同期になっているので、同期Consumer内で使う場合は___`async_to_sync`デコレータを使って同期処理に変換___
+    - ( ___views/ws/kanban_consumer.py___ ) Consumerが初期化されるタイミングで、ConsumerをChannelLayerに追加
+    - ChannelLayerは、チャットにおけるルームのような概念で、どのルームに所属するかを指定して初期化
+    - URLに含まれている`board_id`をルーム名として使って`group_add`を行う
+    - ChannelLayer関連の処理は非同期になっているので、同期Consumer内で使う場合は___`async_to_sync`デコレータを使って同期処理に変換___
 1. ブロードキャスト処理の実装
-  - ( _views/ws/kanban_consumer.py_ ) `self.channel_layer.group_send`の第一引数でどのグループに
-  メッセージを通知するかを指定するので自身と同じ`room_group_name`を指定
-  第二引数にはメッセージ内容を指定`type:`に文字列で指定したメソッド名が各Consumerで呼び出される
-  - つまり受け取ったConsumer(送信元自身のConsumerも含む)がtypeに指定された`send_board_data`が呼び出され
-  それぞれのConsumerに紐付いたClientに新しいボードデータを戻す
+    - ( ___views/ws/kanban_consumer.py___ ) `self.channel_layer.group_send`の第一引数でどのグループに
+    メッセージを通知するかを指定するので自身と同じ`room_group_name`を指定
+    第二引数にはメッセージ内容を指定`type:`に文字列で指定したメソッド名が各Consumerで呼び出される
+    - つまり受け取ったConsumer(送信元自身のConsumerも含む)がtypeに指定された`send_board_data`が呼び出され
+    それぞれのConsumerに紐付いたClientに新しいボードデータを戻す
 
 ##### 2つのブラウザで開いてるときの例
 1. Client1がカード並び替えを実行
@@ -106,15 +106,15 @@ Websocketの接続ごとに生成されるConsumerインスタンスはChannelLa
 
 ##### Card追加のロジック
 1. CardはPipeLine内での位置をorderという属性で管理しているので、追加時はその最大のorderよりも大きい値をセット
-  - orderは連番であることを期待しているので、単にCardの数+1
-    1. ( _modules/kanban/models/card.py_ ) `get_current_card_count_by_pipe_line`でPipeLine内のCard数を取得
-    1. ( _modules/kanban/service.py_ ) `add_card`で、現在のカード数 + 1
-      - ( _views/api/boards.py_ ) add_card用のAPI `class CardApi`
-        - ( _views/urls.py_ )cardTitleとpipeLineIdをパラメータとしてとる
+    - orderは連番であることを期待しているので、単にCardの数+1
+      1. ( ___modules/kanban/models/card.py___ ) `get_current_card_count_by_pipe_line`でPipeLine内のCard数を取得
+      1. ( ___modules/kanban/service.py___ ) `add_card`で、現在のカード数 + 1
+        - ( ___views/api/boards.py___ ) add_card用のAPI `class CardApi`
+          - ( ___views/urls.py___ )cardTitleとpipeLineIdをパラメータとしてとる
 1. フロント側からサーバサイドへアクセスする際に利用するAPIClient(KanbanClient)の`addCard`メソッドで`api/cards`にアクセス
-  - ( _vuejs/utils/kanbanClient.js_ ) `addCard({ cardTitle, pipeLineId })`
-  - ( _vuejs/src/store/pages/board.js_ ) `async addCard`
-  - ( _vuejs/src/pages/Board/components/BoardArea/PipeLine.vue_ )
+    - ( ___vuejs/utils/kanbanClient.js___ ) `addCard({ cardTitle, pipeLineId })`
+    - ( ___vuejs/src/store/pages/board.js___ ) `async addCard`
+    - ( ___vuejs/src/pages/Board/components/BoardArea/PipeLine.vue___ )
 1. Card追加完了後にデータ再取得
-  - ( _views/ws/kanban_consumer.py_ ) `broadcast_board_data`というメッセージを
-  サーバ側に送信することで同じボードを開いている全クライアントのデータが更新
+    - ( ___views/ws/kanban_consumer.py___ ) `broadcast_board_data`というメッセージを
+    サーバ側に送信することで同じボードを開いている全クライアントのデータが更新
