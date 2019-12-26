@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 
 cd /app/application/vuejs
-npm install
+npm ci
 npm run build-watch

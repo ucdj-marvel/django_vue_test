@@ -16,7 +16,7 @@ const router = new Router({
     {
       path: '/',
       component: DefaultLayout,
-      // localhost:3000へのアクセスでHome.vueが表示
+      // localhost:3000へのアクセスでHome/Index.vueが表示
       children: [
         {
           path: '',
