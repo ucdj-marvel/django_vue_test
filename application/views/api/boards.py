@@ -1,9 +1,19 @@
+import json
+
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 from django.views.generic import View
 
 from modules.kanban import service as kanban_sv
 
 
+# APIでCSRFを考慮するのは複雑なので、解除
+# Djangoではgetやpostに処理を引き渡す
+# dispatchというメソッドがデフォルトで定義
+# そこにcsrf_exemptを付与する
+# TODO: APIにCSRFを適用
+@method_decorator(csrf_exempt, name='dispatch')
 class BoardListApi(View):
 
     def get(self, request):
@@ -18,4 +28,21 @@ class BoardListApi(View):
             })
         return JsonResponse({
             'board_list': board_list,
+        })
+
+    def post(self, request):
+        """
+        新しいボードを追加する
+        """
+        data = json.loads(request.body)
+        board_name = data.get('boardName')
+        board = kanban_sv.add_board(
+            owner=request.user,
+            board_name=board_name
+        )
+        return JsonResponse({
+            'board_data': {
+                'id': board.id,
+                'name': board.name,
+            }
         })

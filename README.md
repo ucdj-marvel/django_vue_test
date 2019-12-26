@@ -6,26 +6,41 @@ django-vue-template
 * Django channels 2.1
 * Vue
 * Vuex
-* vuecli 3
+* vue/cli@4.1.1
 
-??
--------------------
-```touch .env
-vim .env
-edit DJANGO_ENV```
+### ??
+```
+git clone
+cd django_vue_test
+pipenv install --python 3.6
+touch .env
+cd /app/application/vuejs
+touch .env.vuejs
+cd
+```
 
-```docker-compose up -d
+```
+docker-compose up -d
 docker-compose exec service python manage.py createsuperuser
-docker-compose exec service python manage.py migrate```
+docker-compose exec service python manage.py migrate
+```
 
-????????????
--------------------
-```docker-compose exec service python manage.py makemigrations { ???? }```
+### ??????
+```
+docker-compose exec service python manage.py makemigrations { ???? }
+```
 
-????
--------------------
-```docker-compose logs vuejs | less
+### vuejs????????
+```
+docker-compose logs vuejs | less
 
 docker-compose run vuejs sh
 
-rm -rf node_modules package-lock.json && npm install```
+rm -rf node_modules package-lock.json && npm install
+```
+
+#### websocket?????
+```
+pipenv shell
+python wstest.py
+```

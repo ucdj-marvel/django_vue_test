@@ -45,16 +45,20 @@ class KanbanClient extends Client {
     super();
     this.baseUrl = '/api';
   }
-
   async getAccountInfo() {
     const response = await this._get(`${this.baseUrl}/accounts/`);
     return response.data.accountInfo;
   }
-
   // Boardの一覧取得
   async getBoardList() {
     const response = await this._get(`${this.baseUrl}/boards/`);
     return response.data.boardList;
+  }
+  // Boardの追加
+  async addBoard({ boardName }) {
+    await this._post(`${this.baseUrl}/boards/`, {
+      boardName,
+    });
   }
 }
 // getAccountInfoを呼び出すと/api/accounts/にアクセスし

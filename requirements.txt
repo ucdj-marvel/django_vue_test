@@ -27,3 +27,4 @@ Twisted==18.7.0
 txaio==18.7.1
 urllib3==1.23
 zope.interface==4.5.0
+wsrequests==0.1.1

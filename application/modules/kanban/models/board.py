@@ -22,3 +22,11 @@ class Board(models.Model):
         ユーザが保持するボードの一覧を戻すORM
         """
         return list(cls.objects.filter(owner=owner).order_by('updated_at'))
+
+    # Boardを取得⇨紐づくPipeLineの一覧を取得⇨紐づくCard一覧取得
+    @classmethod
+    def get_by_id(cls, board_id):
+        try:
+            return cls.objects.get(pk=board_id)
+        except cls.DoesNotExist:
+            return None
