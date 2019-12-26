@@ -24,4 +24,8 @@ docker-compose exec service python manage.py migrate```
 
 ????
 -------------------
-```docker-compose logs vuejs | less```
+```docker-compose logs vuejs | less
+
+docker-compose run vuejs sh
+
+rm -rf node_modules package-lock.json && npm install```
