@@ -8,7 +8,7 @@ django-vue-template
 * Vuex
 * vue/cli@4.1.1
 
-### ??
+### 環境構築
 ```
 git clone
 cd django_vue_test
@@ -25,12 +25,12 @@ docker-compose exec service python manage.py createsuperuser
 docker-compose exec service python manage.py migrate
 ```
 
-### ??????
+### モデル作成
 ```
-docker-compose exec service python manage.py makemigrations { ???? }
+docker-compose exec service python manage.py makemigrations { アプリ名 }
 ```
 
-### vuejs????????
+### vuejsコンテナデバッグ
 ```
 docker-compose logs vuejs | less
 
@@ -39,7 +39,7 @@ docker-compose run vuejs sh
 rm -rf node_modules package-lock.json && npm install
 ```
 
-#### websocket?????
+#### websocket通信テスト
 ```
 pipenv shell
 python wstest.py
