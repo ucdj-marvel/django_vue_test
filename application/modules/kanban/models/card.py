@@ -26,3 +26,8 @@ class Card(models.Model):
             return cls.objects.get(id=card_id)
         except cls.DoesNotExist:
             return None
+
+    # PipeLine内のCard数を戻すクエリ
+    @classmethod
+    def get_current_card_count_by_pipe_line(cls, pipe_line):
+        return cls.objects.filter(pipe_line=pipe_line).count()

@@ -19,7 +19,8 @@ class KanbanConsumer(JsonWebsocketConsumer):
         # self.action_mapにどのメッセージが来たら
         # どのメソッドを呼び出すかの対応を定義
         self.action_map = {
-            'update_card_order': self.update_card_order
+            'update_card_order': self.update_card_order,
+            'broadcast_board_data': self.broadcast_board_data
         }
         self.room_group_name = None
 
@@ -92,3 +93,18 @@ class KanbanConsumer(JsonWebsocketConsumer):
         if not action:
             raise Exception('{} is not a valid action_type'.format(content['type']))
         action(content)
+
+    # このメソッドを呼び出してメッセージをサーバ側に送信することで
+    # 同じボードを開いている全クライアントのデータが更新できる
+    def broadcast_board_data(self, content=None):
+        """
+        全クライアントに、ボードデータの再取得を依頼する
+        :param content:
+        :return:
+        """
+        async_to_sync(self.channel_layer.group_send)(
+            self.room_group_name,
+            {
+                'type': 'send_board_data',
+            }
+        )

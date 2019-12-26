@@ -1,4 +1,5 @@
 import camelcaseKeys from 'camelcase-keys';
+import kanbanClient from "../../../utils/kanbanClient";
 
 
 const state = {
@@ -35,6 +36,12 @@ const actions = {
       cardIdList: cardList.map(x => x.cardId),
     });
     commit('updateCardOrder', { pipeLineId, cardList });
+  },
+  async addCard({ commit }, { pipeLineId, cardTitle }) {
+    await kanbanClient.addCard({
+      pipeLineId,
+      cardTitle,
+    });
   },
 };
 

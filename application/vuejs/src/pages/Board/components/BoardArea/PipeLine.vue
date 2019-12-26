@@ -76,6 +76,12 @@ export default {
   methods: {
     addCardAction() {
       const cardTitle = window.prompt('CardTitle?');
+      if (cardTitle) {
+        this.addCard({
+          pipeLineId: this.pipeLine.pipeLineId,
+          cardTitle,
+        });
+      }
     },
     delPipeLineAction() {
       window.confirm(`DELETE [${this.pipeLineName}] ? Are you sure?`);
@@ -84,6 +90,7 @@ export default {
     // その中でupdateCardOrderを呼び出してやれば新しい並び順を渡すことができる
     ...mapActions([
       'updateCardOrder',
+      'addCard',
     ]),
     ...mapGetters([
       'getBoardId',

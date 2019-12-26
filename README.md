@@ -53,26 +53,27 @@ rm -rf node_modules package-lock.json && npm install
 ```
 
 ## メモ
----
+
 ##### カードの並び順の更新流れ
+
 1. Component_vuejs/src/store/pages/boards.py_から`updateCardOrder(action)`を呼び出し
-1. Websocket経由で情報の更新をサーバにリクエスト_vies/ws/kanban_consumer.py_
+1. ( _vies/ws/kanban_consumer.py_ ) Websocket経由で情報の更新をサーバにリクエスト
 1. サーバ側がWebsocketで新しいカードの並び順(正確にばボード全体のデータ)を返送し
-1. `setBoardData(mutation)`が実行される_vuejs/src/store/pages/boards.py_
+1. ( _vuejs/src/store/pages/boards.py_ ) `setBoardData(mutation)`が実行される
   - Component側で、D&Dが完了するのは1.だが、新しい並び順になるのは4.まで完了した時点
     - そのため、その間はD&Dが完了しても、その前のデータがレンダリングされてしまうのでチラツキが発生
     - Websocketではサーバが次のメッセージを戻すまで待つといったことができない
       - 対策として、処理を実行したクライアントではサーバのメッセージを待たずにデータを更新する
       - _vuejs/src/store/pages/board.js_
-      ~~~javascript
-      commit('updateCardOrder', { pipeLineId, cardList });
-      ...
-      updateCardOrder(state, { pipeLineId, cardList }) { // あるPipeLine内の並びだけ更新する
-        const targetPipeLine = state.boardData.pipeLineList.find(pipeLine => pipeLine.pipeLineId === pipeLineId);
-        targetPipeLine.cardList = cardList;
-      },
-      ...
-      ~~~
+        ~~~javascript
+        commit('updateCardOrder', { pipeLineId, cardList });
+        ...
+        updateCardOrder(state, { pipeLineId, cardList }) { // あるPipeLine内の並びだけ更新する
+          const targetPipeLine = state.boardData.pipeLineList.find(pipeLine => pipeLine.pipeLineId === pipeLineId);
+          targetPipeLine.cardList = cardList;
+        },
+        ...
+        ~~~
       - `updateCardOrder(mutation)`を追加し、`updateCardOrder(action)`内でサーバにリクエスした直後に
       `commit('updateCardOrder', { pipeLineId, cardList })`を呼び出し
       サーバの返答を待たずに自身のStore内のデータだけは更新する
@@ -83,12 +84,12 @@ Websocketの接続ごとに生成されるConsumerインスタンスはChannelLa
 1. ChannelLayerを有効化にする
   - `CHANNEL_LAYERS`をsettingsに追加(バックエンドをRedisにする)
 1. ConsumerにChannelLayerの初期化を追加
-  - Consumerが初期化されるタイミングで、ConsumerをChannelLayerに追加_views/ws/kanban_consumer.py_
+  - ( _views/ws/kanban_consumer.py_ ) Consumerが初期化されるタイミングで、ConsumerをChannelLayerに追加
   - ChannelLayerは、チャットにおけるルームのような概念で、どのルームに所属するかを指定して初期化
   - URLに含まれている`board_id`をルーム名として使って`group_add`を行う
   - ChannelLayer関連の処理は非同期になっているので、同期Consumer内で使う場合は___`async_to_sync`デコレータを使って同期処理に変換___
 1. ブロードキャスト処理の実装
-  - _views/ws/kanban_consumer.py_ `self.channel_layer.group_send`の第一引数でどのグループに
+  - ( _views/ws/kanban_consumer.py_ ) `self.channel_layer.group_send`の第一引数でどのグループに
   メッセージを通知するかを指定するので自身と同じ`room_group_name`を指定
   第二引数にはメッセージ内容を指定`type:`に文字列で指定したメソッド名が各Consumerで呼び出される
   - つまり受け取ったConsumer(送信元自身のConsumerも含む)がtypeに指定された`send_board_data`が呼び出され
@@ -102,3 +103,18 @@ Websocketの接続ごとに生成されるConsumerインスタンスはChannelLa
 1. Consumer1がClient1,Consumer2がClient2に新しい並びでのボードデータを送信
 1. Client1,Client2が新しい並びで再レンダリング
 
+
+##### Card追加のロジック
+1. CardはPipeLine内での位置をorderという属性で管理しているので、追加時はその最大のorderよりも大きい値をセット
+  - orderは連番であることを期待しているので、単にCardの数+1
+    1. ( _modules/kanban/models/card.py_ ) `get_current_card_count_by_pipe_line`でPipeLine内のCard数を取得
+    1. ( _modules/kanban/service.py_ ) `add_card`で、現在のカード数 + 1
+      - ( _views/api/boards.py_ ) add_card用のAPI `class CardApi`
+        - ( _views/urls.py_ )cardTitleとpipeLineIdをパラメータとしてとる
+1. フロント側からサーバサイドへアクセスする際に利用するAPIClient(KanbanClient)の`addCard`メソッドで`api/cards`にアクセス
+  - ( _vuejs/utils/kanbanClient.js_ ) `addCard({ cardTitle, pipeLineId })`
+  - ( _vuejs/src/store/pages/board.js_ ) `async addCard`
+  - ( _vuejs/src/pages/Board/components/BoardArea/PipeLine.vue_ )
+1. Card追加完了後にデータ再取得
+  - ( _views/ws/kanban_consumer.py_ ) `broadcast_board_data`というメッセージを
+  サーバ側に送信することで同じボードを開いている全クライアントのデータが更新

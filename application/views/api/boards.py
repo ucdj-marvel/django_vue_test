@@ -46,3 +46,27 @@ class BoardListApi(View):
                 'name': board.name,
             }
         })
+
+
+# add_cardを呼び出すAPI
+@method_decorator(csrf_exempt, name='dispatch')
+class CardApi(View):
+
+    def post(self, request):
+        """
+        新しいcardを追加する
+        """
+        data = json.loads(request.body)
+        card_title = data.get('cardTitle')
+        pipe_line_id = data.get('pipeLineId')
+
+        card = kanban_sv.add_card(
+            pipe_line_id=pipe_line_id,
+            card_title=card_title
+        )
+        return JsonResponse({
+            'card_data': {
+                'id': card.id,
+                'name': card.title,
+            }
+        })

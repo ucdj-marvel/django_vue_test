@@ -60,6 +60,12 @@ class KanbanClient extends Client {
       boardName,
     });
   }
+  async addCard({ cardTitle, pipeLineId }) {
+    await this._post(`${this.baseUrl}/boards/`, {
+      cardTitle,
+      pipeLineId,
+    });
+  }
 }
 // getAccountInfoを呼び出すと/api/accounts/にアクセスし
 // その結果をキャメルケースに変換したものが戻される

@@ -7,7 +7,7 @@ from django.views.generic import TemplateView
 
 from .accounts import signup as signup_view
 from .api.accounts import AccountsApi
-from .api.boards import BoardListApi
+from .api.boards import BoardListApi, CardApi
 
 
 urlpatterns = [
@@ -16,6 +16,7 @@ urlpatterns = [
     path('accounts/signup/', signup_view.SignUpView.as_view(), name='signup'),
     path('api/accounts/', AccountsApi.as_view()),
     path('api/boards/', login_required(BoardListApi.as_view())),
+    path('api/cards/', login_required(CardApi.as_view())),
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

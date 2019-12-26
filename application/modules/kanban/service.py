@@ -71,3 +71,16 @@ def update_card_order(pipe_line_id, card_id_list):
         card.order = i
         card.pipe_line = pipe_line
         card.save()
+
+
+def add_card(pipe_line_id, card_title):
+    pipe_line = PipeLine.get_by_id(pipe_line_id)
+    current_count = Card.get_current_card_count_by_pipe_line(pipe_line)
+    card = Card(
+        title=card_title,
+        content=None,
+        pipe_line=pipe_line,
+        order=current_count + 1,  # 現在のカード数+1で末尾になる
+    )
+    card.save()
+    return card
