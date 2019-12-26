@@ -8,7 +8,7 @@
 
 <script>
 import { createNamespacedHelpers } from 'vuex';
-import BoardCard from './components/BoardCard.vue';
+import BoardCard from '../../components/BoardCard.vue';
 
 const { mapState, mapActions } = createNamespacedHelpers('home');
 

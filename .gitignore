@@ -3,6 +3,7 @@
 
 # Environments
 .env
+.env.vuejs
 .venv
 env/
 venv/
