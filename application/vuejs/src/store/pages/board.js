@@ -22,6 +22,19 @@ const getters = {
 };
 
 const actions = {
+  // Consumerのupdate_card_orderをStoreから呼び出せるように定義
+  // 更新対象のpipeLineIdと新しい並び順になったカードの一覧をcardListとして受け取る
+  updateCardOrder({ commit, getters }, { pipeLineId, cardList }) {
+    console.log(pipeLineId, cardList);
+    // rootStoreに格納されているWebSocketのコネクションを取得
+    const socket = getters.getSocket;
+    // サーバに対してsendObjでtype: update_card_orderを含んだメッセージを送信
+    socket.sendObj({
+      type: 'update_card_order',
+      pipeLineId,
+      cardIdList: cardList.map(x => x.cardId),
+    });
+  },
 };
 
 // Consumerから戻されたボードのデータをしまうためのstate.boardDataと

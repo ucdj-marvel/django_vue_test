@@ -15,6 +15,11 @@ class KanbanConsumer(JsonWebsocketConsumer):
         self.user = None
         self.board_id = None
         self.namespace = 'board'
+        # self.action_mapにどのメッセージが来たら
+        # どのメソッドを呼び出すかの対応を定義
+        self.action_map = {
+            'update_card_order': self.update_card_order
+        }
 
     def connect(self):
         # 認証チェック
@@ -43,3 +48,32 @@ class KanbanConsumer(JsonWebsocketConsumer):
             'namespace': self.namespace,
         })
         print(board_data)
+
+    def update_card_order(self, content):
+        """
+        ボード内のカードの並び順を更新する
+        {
+            'type': 'update_card_order',
+            'pipeLineId': 1,
+            'cardIdList': [3, 1]
+        }
+        :return:
+        """
+        pipe_line_id = content['pipeLineId']
+        card_id_list = content['cardIdList']
+        kanban_sv.update_card_order(pipe_line_id, card_id_list)
+        self.send_board_data()
+
+    # メッセージ内のtypeに該当するものを直接呼び出し
+    # 未定義のtypeを受け取った場合は例外を送出
+    def receive_json(self, content, **kwargs):
+        """
+        Typeに応じた処理を呼び出して実行する
+        :param dict content:
+        :param kwargs:
+        :return:
+        """
+        action = self.action_map.get(content['type'])
+        if not action:
+            raise Exception('{} is not a valid action_type'.format(content['type']))
+        action(content)

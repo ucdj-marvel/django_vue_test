@@ -55,3 +55,19 @@ def get_board_data_by_board_id(board_id):
         board_data['pipe_line_list'].append(pipe_line_data)
 
     return board_data
+
+
+# PipeLineのIDと新しい並び順としてのCardIdのListを受け取り
+# その順にcard.orderを更新するサービス
+def update_card_order(pipe_line_id, card_id_list):
+    """
+    :param int pipe_line_id:
+    :param list card_id_list:
+    :return:
+    """
+    pipe_line = PipeLine.get_by_id(pipe_line_id)
+    for i, card_id in enumerate(card_id_list):
+        card = Card.get_by_id(card_id)
+        card.order = i
+        card.pipe_line = pipe_line
+        card.save()

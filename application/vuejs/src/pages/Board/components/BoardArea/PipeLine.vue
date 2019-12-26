@@ -27,8 +27,11 @@
 </template>
 
 <script>
+import { createNamespacedHelpers } from 'vuex';
 import Draggable from 'vuedraggable';
 import Card from './Card.vue';
+
+const { mapActions, mapGetters } = createNamespacedHelpers('board');
 
 export default {
   name: 'PipeLine',
@@ -60,6 +63,10 @@ export default {
       },
       set(value) {
         console.log(value);
+        this.updateCardOrder({
+          pipeLineId: this.pipeLine.pipeLineId,
+          cardList: value,
+        });
       },
     },
     pipeLineName() {
@@ -73,6 +80,14 @@ export default {
     delPipeLineAction() {
       window.confirm(`DELETE [${this.pipeLineName}] ? Are you sure?`);
     },
+    // VueDraggableはD&D終了時に、v-modelに指定したwrappedCardListのsetを呼び出す
+    // その中でupdateCardOrderを呼び出してやれば新しい並び順を渡すことができる
+    ...mapActions([
+      'updateCardOrder',
+    ]),
+    ...mapGetters([
+      'getBoardId',
+    ]),
   },
 };
 </script>

@@ -17,3 +17,11 @@ class PipeLine(models.Model):
     @classmethod
     def get_list_by_board(cls, board):
         return list(cls.objects.filter(board=board).order_by('order'))
+
+    # PipeLineをID指定で取得
+    @classmethod
+    def get_by_id(cls, pipe_line_id):
+        try:
+            return cls.objects.get(id=pipe_line_id)
+        except cls.DoesNotExist:
+            return None
