@@ -94,3 +94,27 @@ def get_card_by_card_id(card_id):
     :return:
     """
     return Card.get_by_id(card_id)
+
+
+# カードの更新
+def update_card(card_id, title=None, content=None):
+    """
+    :param int card_id:
+    :param str title:
+    :param str content:
+    :return:
+    :rtype Card:
+    """
+    card = Card.get_by_id(card_id)
+    if title:
+        card.title = title
+    if content:
+        card.content = content
+    card.save()
+    return card
+
+
+# カードの削除
+def delete_card(card_id):
+    card = Card.get_by_id(card_id)
+    card.delete()

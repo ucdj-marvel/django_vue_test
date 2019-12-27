@@ -89,3 +89,29 @@ class CardGetApi(View):
                 'updated_at': card.updated_at,
             }
         })
+
+    def patch(self, request, board_id, card_id):
+        """
+        カードの内容を更新する
+        """
+        data = json.loads(request.body)
+        title = data.get('title')
+        content = data.get('content')
+        card = kanban_sv.update_card(card_id=card_id, title=title, content=content)
+
+        return JsonResponse({
+            'card_data': {
+                'title': card.title,
+                'content': card.content,
+                'updated_at': card.updated_at,
+            }
+        })
+
+    def delete(self, _, board_id, card_id):
+        """
+        カードを削除する
+        """
+        kanban_sv.delete_card(card_id=card_id)
+        return JsonResponse({
+            'success': True
+        })

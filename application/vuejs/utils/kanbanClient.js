@@ -72,6 +72,23 @@ class KanbanClient extends Client {
     const response = await this._get(`${this.baseUrl}/boards/${boardId}/cards/${cardId}/`);
     return response.data.cardData;
   }
+  // カードの更新
+  async updateCardData({
+    boardId,
+    cardId,
+    content,
+    title,
+  }) {
+    const response = await this._patch(`${this.baseUrl}/boards/${boardId}/cards/${cardId}/`, {
+      content,
+      title,
+    });
+    return response.data.cardData;
+  }
+  // カードの削除
+  async deleteCard({ boardId, cardId }) {
+    await this._delete(`${this.baseUrl}/boards/${boardId}/cards/${cardId}/`);
+  }
 }
 // getAccountInfoを呼び出すと/api/accounts/にアクセスし
 // その結果をキャメルケースに変換したものが戻される

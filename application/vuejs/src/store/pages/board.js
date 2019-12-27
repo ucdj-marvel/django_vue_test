@@ -24,6 +24,13 @@ const getters = {
 };
 
 const actions = {
+  // ルーム内同期
+  broadcastBoardData({ getters }) {
+    const socket = getters.getSocket;
+    socket.sendObj({
+      type: 'broadcast_board_data',
+    });
+  },
   // Consumerのupdate_card_orderをStoreから呼び出せるように定義
   // 更新対象のpipeLineIdと新しい並び順になったカードの一覧をcardListとして受け取る
   updateCardOrder({ commit, getters }, { pipeLineId, cardList }) {
@@ -38,19 +45,42 @@ const actions = {
     });
     commit('updateCardOrder', { pipeLineId, cardList });
   },
-  async addCard({ commit, getters }, { pipeLineId, cardTitle }) {
+  async addCard({ dispatch }, { pipeLineId, cardTitle }) {
     await kanbanClient.addCard({
       pipeLineId,
       cardTitle,
     });
-    const socket = getters.getSocket;
-    socket.sendObj({
-      type: 'broadcast_board_data',
-    });
+    dispatch('broadcastBoardData');
   },
   async fetchFocusedCard({ commit }, { boardId, cardId }) {
     const cardData = await kanbanClient.getCardData({ boardId, cardId });
     commit('setFocusedCard', cardData);
+  },
+  async updateCardContent({ commit }, { boardId, cardId, content }) {
+    const cardData = await kanbanClient.updateCardData({
+      boardId,
+      cardId,
+      content,
+    });
+    commit('setFocusedCard', cardData);
+  },
+  async updateCardTitle({ commit, dispatch }, { boardId, cardId, title }) {
+    const cardData = await kanbanClient.updateCardData({
+      boardId,
+      cardId,
+      title,
+    });
+    commit('setFocusedCard', cardData);
+    // titleはボード自体に出ているので他のクライアントへの反映を依頼する必要がある
+    dispatch('broadcastBoardData');
+  },
+  async deleteCard({ dispatch }, { boardId, cardId }) {
+    await kanbanClient.deleteCard({
+      boardId,
+      cardId,
+    });
+    // カード自体はボード自体に出ているので他のクライアントへの反映を依頼する必要がある
+    dispatch('broadcastBoardData');
   },
 };
 

@@ -54,7 +54,7 @@ rm -rf node_modules package-lock.json && npm install
 
 ## メモ
 
-##### カードの並び順の更新流れ
+##### カードの並び順の更新
 
 1. Component_vuejs/src/store/pages/boards.py_から`updateCardOrder(action)`を呼び出し
 1. ( ___vies/ws/kanban_consumer.py___ ) Websocket経由で情報の更新をサーバにリクエスト
@@ -78,7 +78,9 @@ rm -rf node_modules package-lock.json && npm install
       `commit('updateCardOrder', { pipeLineId, cardList })`を呼び出し
       サーバの返答を待たずに自身のStore内のデータだけは更新する
 
+
 ##### ブラウザ間のデータ同期
+
 Channelsでブラウザをまたがってメッセージの送受信をするにはChannelLayerというコンポーネントを使用
 Websocketの接続ごとに生成されるConsumerインスタンスはChannelLayerを通じて相互にメッセージ受信ができるようになる
 1. ChannelLayerを有効化にする
@@ -95,7 +97,9 @@ Websocketの接続ごとに生成されるConsumerインスタンスはChannelLa
     - つまり受け取ったConsumer(送信元自身のConsumerも含む)がtypeに指定された`send_board_data`が呼び出され
     それぞれのConsumerに紐付いたClientに新しいボードデータを戻す
 
+
 ##### 2つのブラウザで開いてるときの例
+
 1. Client1がカード並び替えを実行
 1. Consumer1が新しい並びでカードを更新
 1. Consumer1が同じGroupに所属するConsumerにメッセージを送信
@@ -104,7 +108,8 @@ Websocketの接続ごとに生成されるConsumerインスタンスはChannelLa
 1. Client1,Client2が新しい並びで再レンダリング
 
 
-##### Card追加のロジック
+##### Card追加
+
 1. CardはPipeLine内での位置をorderという属性で管理しているので、追加時はその最大のorderよりも大きい値をセット
     - orderは連番であることを期待しているので、単にCardの数+1
       1. ( ___modules/kanban/models/card.py___ ) `get_current_card_count_by_pipe_line`でPipeLine内のCard数を取得
@@ -120,7 +125,8 @@ Websocketの接続ごとに生成されるConsumerインスタンスはChannelLa
     サーバ側に送信することで同じボードを開いている全クライアントのデータが更新
 
 
-##### モーダルコンポーネント(カードクリック時のロジック)
+##### モーダルコンポーネント(カードクリック時)
+
 * ( ___vuejs/src/pages/Board/Card/Show.vue___ ) カード詳細モーダル
     - 単に表示・非表示のフラグをStoreに持たせる方法もあるが、
     `boards/:boradId/cards/:cardId`のURLでモーダルを開いている状態として表現
@@ -141,3 +147,17 @@ Websocketの接続ごとに生成されるConsumerインスタンスはChannelLa
 1. ( ___vuejs/src/pages/Board/Card/Show.vue___ ) コンポーネントに組み込み
     - `watch`で`cardId`を`immediate: true`で指定しているので、`Props`で渡ってくる`CardId`が変更されるごとに
     Storeの`fetchFocusedCard`が呼び出され、モーダル内での表示されるカード情報が更新される
+
+
+##### カード更新・削除
+
+1. ( ___modules/kanban/service.py___ ) 更新: `update_card`、削除: `delete_card`
+1. ( ___views/api/boards.py___ ) `CardGetApi`の`patch`メソッド、`delete`メソッドで更新・削除
+1. ( ___vuejs/utils/kanbanClient.js___ ) URLはモーダルと同じでメソッドのみ変更　`updateCardData`,`deleteCard`を追加
+1. ( ___vuejs/src/store/pages/board.js___ )
+    - 更新関連のActionが`updateCardContent`と`updateCardTitle`の2つある点について。
+    どちらも更新処理自体はClientに追加した`updateCardData`を使うが、
+    タイトルはボードの画面にも出ているので更新したら他のクライアントにも通知しなければいけないので
+    Titleの更新だけは更新完了後に`dispatch('broadcastBoardData');`を
+    呼び出して他のクライアントにボードデータの再取得を促している
+1. ( ___vuejs/src/pages/Board/Card/Show.vue___ ) ダブルクリックしたらフォーム出現する様に変更

@@ -11,8 +11,8 @@ const actions = {
     commit('setBoardList', { boardList });
   },
   // stateを更新せず、ボードの追加が完了したら
-  // dispatch('fetchBoardList');でf
-  // etchBoardListアクションを呼び出し、ボード一覧の再取得
+  // dispatch('fetchBoardList');で
+  // fetchBoardListアクションを呼び出し、ボード一覧の再取得
   async addBoard({ dispatch }, { boardName }) {
     await KanbanClient.addBoard({ boardName });
     dispatch('fetchBoardList');
