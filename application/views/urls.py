@@ -7,12 +7,17 @@ from django.views.generic import TemplateView
 
 from .accounts import signup as signup_view
 from .api.accounts import AccountsApi
+from .api.boards import BoardListApi, CardApi, CardGetApi
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('django.contrib.auth.urls')),
     path('accounts/signup/', signup_view.SignUpView.as_view(), name='signup'),
-    path('api/accounts/', AccountsApi.as_view())
+    path('api/accounts/', AccountsApi.as_view()),
+    path('api/boards/', login_required(BoardListApi.as_view())),
+    path('api/boards/<int:board_id>/cards/<int:card_id>/', login_required(CardGetApi.as_view())),
+    path('api/cards/', login_required(CardApi.as_view())),
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

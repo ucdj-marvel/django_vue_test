@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'channels',
     'modules.kanban',
 ]
 
@@ -108,9 +109,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/2.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ja'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Tokyo'
 
 USE_I18N = True
 
@@ -133,3 +134,16 @@ ROOT_URLCONF = 'application.views.urls'
 LOGIN_REDIRECT_URL = '/'  # ログイン完了後のリダイレクト先
 LOGIN_URL = '/accounts/login/'  # ログアウト後のリダイレクト先
 LOGOUT_REDIRECT_URL = '/'
+
+# ASGIの起点を指定
+ASGI_APPLICATION = 'views.routing.application'
+
+# バックエンドをRedisにする
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('redis', 6379)],
+        },
+    },
+}

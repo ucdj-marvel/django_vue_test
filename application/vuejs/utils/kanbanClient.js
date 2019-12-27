@@ -1,5 +1,6 @@
 // APIにアクセスするユーティリティ(API Client)
-import axios from 'axios'; // javascriptのHTTPClientライブラリ
+// javascriptのHTTPClientライブラリ
+import axios from 'axios';
 import { loadProgressBar } from 'axios-progress-bar';
 import camelcaseKeys from 'camelcase-keys';
 
@@ -44,10 +45,49 @@ class KanbanClient extends Client {
     super();
     this.baseUrl = '/api';
   }
-
   async getAccountInfo() {
     const response = await this._get(`${this.baseUrl}/accounts/`);
     return response.data.accountInfo;
+  }
+  // Boardの一覧取得
+  async getBoardList() {
+    const response = await this._get(`${this.baseUrl}/boards/`);
+    return response.data.boardList;
+  }
+  // Boardの追加
+  async addBoard({ boardName }) {
+    await this._post(`${this.baseUrl}/boards/`, {
+      boardName,
+    });
+  }
+  // カードの追加
+  async addCard({ cardTitle, pipeLineId }) {
+    await this._post(`${this.baseUrl}/cards/`, {
+      cardTitle,
+      pipeLineId,
+    });
+  }
+  // モーダルで表示するカードのAPI呼び出し
+  async getCardData({ boardId, cardId }) {
+    const response = await this._get(`${this.baseUrl}/boards/${boardId}/cards/${cardId}/`);
+    return response.data.cardData;
+  }
+  // カードの更新
+  async updateCardData({
+    boardId,
+    cardId,
+    content,
+    title,
+  }) {
+    const response = await this._patch(`${this.baseUrl}/boards/${boardId}/cards/${cardId}/`, {
+      content,
+      title,
+    });
+    return response.data.cardData;
+  }
+  // カードの削除
+  async deleteCard({ boardId, cardId }) {
+    await this._delete(`${this.baseUrl}/boards/${boardId}/cards/${cardId}/`);
   }
 }
 // getAccountInfoを呼び出すと/api/accounts/にアクセスし

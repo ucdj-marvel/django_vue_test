@@ -1,0 +1,15 @@
+# pyenv
+.python-version
+
+# Environments
+.env
+.env.vuejs
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Editor
+.vscode/
