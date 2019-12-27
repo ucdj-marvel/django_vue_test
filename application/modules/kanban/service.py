@@ -73,6 +73,7 @@ def update_card_order(pipe_line_id, card_id_list):
         card.save()
 
 
+# カードを追加
 def add_card(pipe_line_id, card_title):
     pipe_line = PipeLine.get_by_id(pipe_line_id)
     current_count = Card.get_current_card_count_by_pipe_line(pipe_line)
@@ -80,7 +81,16 @@ def add_card(pipe_line_id, card_title):
         title=card_title,
         content=None,
         pipe_line=pipe_line,
-        order=current_count + 1,  # 現在のカード数+1で末尾になる
+        order=current_count + 1,  # 現在のカード数1で末尾になる
     )
     card.save()
     return card
+
+
+# カードを取得
+def get_card_by_card_id(card_id):
+    """
+    :param int card_id:
+    :return:
+    """
+    return Card.get_by_id(card_id)

@@ -70,3 +70,22 @@ class CardApi(View):
                 'name': card.title,
             }
         })
+
+
+# モーダルで表示するカードを取得
+@method_decorator(csrf_exempt, name='dispatch')
+class CardGetApi(View):
+
+    def get(self, _, board_id, card_id):
+        """
+        カードを取得する
+        """
+        card = kanban_sv.get_card_by_card_id(card_id)
+
+        return JsonResponse({
+            'card_data': {
+                'title': card.title,
+                'content': card.content,
+                'updated_at': card.updated_at,
+            }
+        })

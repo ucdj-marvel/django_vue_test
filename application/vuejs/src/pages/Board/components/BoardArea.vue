@@ -15,6 +15,7 @@
         :key="pipeLine.id"
       />
     </Draggable>
+    <router-view></router-view>
   </div>
 </template>
 

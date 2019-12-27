@@ -108,7 +108,7 @@ Websocketの接続ごとに生成されるConsumerインスタンスはChannelLa
 1. CardはPipeLine内での位置をorderという属性で管理しているので、追加時はその最大のorderよりも大きい値をセット
     - orderは連番であることを期待しているので、単にCardの数+1
       1. ( ___modules/kanban/models/card.py___ ) `get_current_card_count_by_pipe_line`でPipeLine内のCard数を取得
-      1. ( ___modules/kanban/service.py___ ) `add_card`で、現在のカード数 + 1
+      1. ( ___modules/kanban/service.py___ ) `add_card`で、現在のカード数+1
         - ( ___views/api/boards.py___ ) add_card用のAPI `class CardApi`
           - ( ___views/urls.py___ )cardTitleとpipeLineIdをパラメータとしてとる
 1. フロント側からサーバサイドへアクセスする際に利用するAPIClient(KanbanClient)の`addCard`メソッドで`api/cards`にアクセス
@@ -118,3 +118,26 @@ Websocketの接続ごとに生成されるConsumerインスタンスはChannelLa
 1. Card追加完了後にデータ再取得
     - ( ___views/ws/kanban_consumer.py___ ) `broadcast_board_data`というメッセージを
     サーバ側に送信することで同じボードを開いている全クライアントのデータが更新
+
+
+##### モーダルコンポーネント(カードクリック時のロジック)
+* ( ___vuejs/src/pages/Board/Card/Show.vue___ ) カード詳細モーダル
+    - 単に表示・非表示のフラグをStoreに持たせる方法もあるが、
+    `boards/:boradId/cards/:cardId`のURLでモーダルを開いている状態として表現
+
+1. BoardAreaコンポーネントの`<router-view>`でモーダルカンバンを画面上に表示
+1. ( ___vuejs/src/router/index.js___ ) でルーティング
+1. ( ___vuejs/src/pages/Board/components/BoardArea/Card.vue___ ) カードクリック時にURL書き換え
+    - `($router.push)`URLを`boards/:boardId/cards/:cardId`に書き換え
+1. モーダルにデータを当てはめる処理(API)
+    - ( ___vuejs/src/pages/Board/Card/Show.vue___ ) で`cardId`と`boardId`を`props`経由で受け取っている
+    - ( ___vuejs/src/router/index.js___ ) VueRouter経由で渡しているのでサーバからカードの詳細を取得する
+    * ( ___modules/kanban/service.py___ ) ID指定でカードを取得するサービスメソッド
+    * ( ___views/api/boards.py___ ) カードを取得するAPI
+1. StoreでAPI呼び出し
+    - ( ___vuejs/utils/kanbanClient.js___ ) `getCardData`でAPIにアクセス
+    - ( ___ vuejs/src/store/pages/board.js___ ) `focusedCard`でモーダルを開いているカードの情報を管理・取得
+    `fetchFocusedCard`を呼び出すことで`state.focusedCard`にカードの情報が入る
+1. ( ___vuejs/src/pages/Board/Card/Show.vue___ ) コンポーネントに組み込み
+    - `watch`で`cardId`を`immediate: true`で指定しているので、`Props`で渡ってくる`CardId`が変更されるごとに
+    Storeの`fetchFocusedCard`が呼び出され、モーダル内での表示されるカード情報が更新される

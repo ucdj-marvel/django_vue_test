@@ -67,6 +67,11 @@ class KanbanClient extends Client {
       pipeLineId,
     });
   }
+  // モーダルで表示するカードのAPI呼び出し
+  async getCardData({ boardId, cardId }) {
+    const response = await this._get(`${this.baseUrl}/boards/${boardId}/cards/${cardId}/`);
+    return response.data.cardData;
+  }
 }
 // getAccountInfoを呼び出すと/api/accounts/にアクセスし
 // その結果をキャメルケースに変換したものが戻される

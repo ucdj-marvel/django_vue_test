@@ -6,6 +6,7 @@ const state = {
   boardData: {
     pipeLineList: [],
   },
+  focusedCard: {},  // 開いているカードの情報
 };
 
 // WebSocketへの接続のstate.socketはrootのStoreの属性なので
@@ -47,6 +48,10 @@ const actions = {
       type: 'broadcast_board_data',
     });
   },
+  async fetchFocusedCard({ commit }, { boardId, cardId }) {
+    const cardData = await kanbanClient.getCardData({ boardId, cardId });
+    commit('setFocusedCard', cardData);
+  },
 };
 
 // Consumerから戻されたボードのデータをしまうためのstate.boardDataと
@@ -59,6 +64,9 @@ const mutations = {
   setBoardData(state, { boardData }) {
     // Pythonから来たデータをCamelCaseに変換
     state.boardData = camelcaseKeys(boardData, { deep: true });
+  },
+  setFocusedCard(state, cardData) {
+    state.focusedCard = cardData;
   },
 };
 
