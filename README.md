@@ -35,7 +35,7 @@ docker-compose exec service python manage.py makemigrations { アプリ名 }
 #### websocket通信テスト
 ```
 pipenv shell
-python wstest.py
+python tests/wstest.py
 ```
 
 #### デバッグ
