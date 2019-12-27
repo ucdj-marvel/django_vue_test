@@ -7,9 +7,11 @@ from modules.kanban import service as kanban_sv
 # JSONをクライアントとやり取りするのであればJsonWebsocketConsumerを継承
 class KanbanConsumer(JsonWebsocketConsumer):
 
-    # Consumerに独自の属性(consumer_id, user)を
-    # もたせるために今回はオーバライド
     def __init__(self, *args, **kwargs):
+        """
+        Consumerに独自の属性(consumer_id, user)を
+        もたせるためにオーバライド
+        """
         super().__init__(*args, **kwargs)
         # 自身に一意なIDを付与する
         self.consumer_id = id(self)
@@ -20,7 +22,10 @@ class KanbanConsumer(JsonWebsocketConsumer):
         # どのメソッドを呼び出すかの対応を定義
         self.action_map = {
             'update_card_order': self.update_card_order,
-            'broadcast_board_data': self.broadcast_board_data
+            'broadcast_board_data': self.broadcast_board_data,
+            'add_pipe_line': self.add_pipe_line,
+            'rename_pipe_line': self.rename_pipe_line,
+            'delete_pipe_line': self.delete_pipe_line,
         }
         self.room_group_name = None
 
@@ -45,9 +50,11 @@ class KanbanConsumer(JsonWebsocketConsumer):
         # 初期データをクライアントに返送
         self.send_board_data()
 
-    # 取得したボードの構成情報をクライアントに戻すメソッド
-    # connect内で呼び出す
     def send_board_data(self, event=None, *args, **kwargs):
+        """
+        取得したボードの構成情報をクライアントに返す
+        connect内で呼び出す
+        """
         board_data = kanban_sv.get_board_data_by_board_id(self.board_id)
         # VueNativeWebsocketではmutation: xxxや
         # action: xxx というデータが含まれたメッセージがWebsocketに来た場合
@@ -80,11 +87,39 @@ class KanbanConsumer(JsonWebsocketConsumer):
             }
         )
 
-    # メッセージ内のtypeに該当するものを直接呼び出し
-    # 未定義のtypeを受け取った場合は例外を送出
+    def add_pipe_line(self, content):
+        """
+        パイプラインの追加
+        """
+        board_id = content['boardId']
+        pipe_line_name = content['pipeLineName']
+        kanban_sv.add_pipe_line(board_id, pipe_line_name)
+        self.broadcast_board_data()
+
+    def rename_pipe_line(self, content):
+        """
+        パイプライン名の変更
+        """
+        pipe_line_id = content['pipeLineId']
+        pipe_line_name = content['pipeLineName']
+        kanban_sv.update_pipe_line(pipe_line_id, pipe_line_name)
+        self.broadcast_board_data()
+
+    def delete_pipe_line(self, content):
+        """
+        パイプラインの削除
+        :param content:
+        :return:
+        """
+        board_id = content['boardId']
+        pipe_line_id = content['pipeLineId']
+        kanban_sv.delete_pipe_line(pipe_line_id)
+        self.broadcast_board_data()
+
     def receive_json(self, content, **kwargs):
         """
-        Typeに応じた処理を呼び出して実行する
+        メッセージ内のtypeに該当するものを直接呼び出し
+        未定義のtypeを受け取った場合は例外を送出
         :param dict content:
         :param kwargs:
         :return:
@@ -94,11 +129,10 @@ class KanbanConsumer(JsonWebsocketConsumer):
             raise Exception('{} is not a valid action_type'.format(content['type']))
         action(content)
 
-    # このメソッドを呼び出してメッセージをサーバ側に送信することで
-    # 同じボードを開いている全クライアントのデータが更新できる
     def broadcast_board_data(self, content=None):
         """
-        全クライアントに、ボードデータの再取得を依頼する
+        このメソッドを呼び出してメッセージをサーバ側に送信することで
+        同じボードを開いている全クライアントのデータが更新できる
         :param content:
         :return:
         """

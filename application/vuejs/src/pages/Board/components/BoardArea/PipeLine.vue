@@ -1,12 +1,18 @@
 <template>
   <div class="pipe-line">
     <nav class="navbar navbar-dark">
-      <span>
-        <span class="navbar-brand mb-0 h1 pipe-line-name">{{ pipeLineName }}</span>
+      <span v-show="!isEditingPipeLineName">
+        <span class="navbar-brand mb-0 h1 pipe-line-name"
+              :class="{ 'waiting-rename' : isWaitingRename}"
+              @dblclick="startPipeLineNameEdit">{{ pipeLineName }}</span>
         <span class="navbar-brand delete-pipe-line" data-toggle="tooltip" data-placement="top"
               title="delete pipeline" @click="delPipeLineAction">
-          (-)
+           Del
         </span>
+      </span>
+      <span v-show="isEditingPipeLineName">
+        <input type="text" v-model="editPipeLineName">
+        <button type="button" class="btn btn-primary" @click="savePipeLineName">save</button>
       </span>
     </nav>
     <button class="add-card-button btn btn-block" @click="addCardAction">
@@ -54,6 +60,9 @@ export default {
         animation: 300,
         draggable: '.item',
       },
+      isEditingPipeLineName: false,
+      isWaitingRename: false,
+      editPipeLineName: '',
     };
   },
   computed: {
@@ -73,6 +82,13 @@ export default {
       return this.pipeLine.name;
     },
   },
+  watch: {
+    pipeLine(newPipeLine, oldPipeLine) {
+      if (newPipeLine.name !== oldPipeLine.name) {
+        this.isWaitingRename = false;
+      }
+    },
+  },
   methods: {
     addCardAction() {
       const cardTitle = window.prompt('CardTitle?');
@@ -84,13 +100,33 @@ export default {
       }
     },
     delPipeLineAction() {
-      window.confirm(`DELETE [${this.pipeLineName}] ? Are you sure?`);
+      if (!window.confirm(`DELETE [${this.pipeLineName}] ? Are you sure?`)) return;
+      this.deletePipeLine({
+        boardId: this.getBoardId(),
+        pipeLineId: this.pipeLine.pipeLineId,
+      });
+    },
+    startPipeLineNameEdit() {
+      this.isEditingPipeLineName = true;
+      this.editPipeLineName = this.pipeLine.name;
+    },
+    async savePipeLineName() {
+      this.isEditingPipeLineName = false;
+      if (this.editPipeLineName === this.pipeLine.name) return;
+      await this.renamePipeLine({
+        pipeLineId: this.pipeLine.pipeLineId,
+        pipeLineName: this.editPipeLineName,
+      });
+      // リネーム完了までのフラグ
+      this.isWaitingRename = true;
     },
     // VueDraggableはD&D終了時に、v-modelに指定したwrappedCardListのsetを呼び出す
     // その中でupdateCardOrderを呼び出してやれば新しい並び順を渡すことができる
     ...mapActions([
       'updateCardOrder',
       'addCard',
+      'renamePipeLine',
+      'deletePipeLine',
     ]),
     ...mapGetters([
       'getBoardId',

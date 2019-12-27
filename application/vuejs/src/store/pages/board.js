@@ -82,6 +82,32 @@ const actions = {
     // カード自体はボード自体に出ているので他のクライアントへの反映を依頼する必要がある
     dispatch('broadcastBoardData');
   },
+  addPipeLine({ getters }, { boardId, pipeLineName }) {
+    console.log(boardId, pipeLineName);
+    const socket = getters.getSocket;
+    socket.sendObj({
+      type: 'add_pipe_line',
+      boardId,
+      pipeLineName,
+    });
+  },
+  renamePipeLine({ getters }, { pipeLineId, pipeLineName }) {
+    const socket = getters.getSocket;
+    socket.sendObj({
+      type: 'rename_pipe_line',
+      pipeLineId,
+      pipeLineName,
+    });
+  },
+  deletePipeLine({ getters }, { boardId, pipeLineId }) {
+    console.log(boardId, pipeLineId);
+    const socket = getters.getSocket;
+    socket.sendObj({
+      type: 'delete_pipe_line',
+      boardId,
+      pipeLineId,
+    });
+  },
 };
 
 // Consumerから戻されたボードのデータをしまうためのstate.boardDataと

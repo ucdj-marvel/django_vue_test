@@ -118,3 +118,31 @@ def update_card(card_id, title=None, content=None):
 def delete_card(card_id):
     card = Card.get_by_id(card_id)
     card.delete()
+
+# パイプライン追加
+def add_pipe_line(board_id, pipe_line_name):
+    board = Board.get_by_id(board_id)
+    current_count = PipeLine.get_current_pipe_line_count_by_board(board)
+    return PipeLine.create(
+        board=board,
+        name=pipe_line_name,
+        order=current_count + 1,
+    )
+
+# パイプライン更新
+def update_pipe_line(pipe_line_id, name=None):
+    """
+    :param int pipe_line_id:
+    :param str name:
+    :return:
+    """
+    pipe_line = PipeLine.get_by_id(pipe_line_id)
+    if name:
+        pipe_line.name = name
+    pipe_line.save()
+    return pipe_line
+
+# パイプライン削除
+def delete_pipe_line(pipe_line_id):
+    pipe_line = PipeLine.get_by_id(pipe_line_id)
+    pipe_line.delete()

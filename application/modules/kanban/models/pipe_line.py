@@ -13,6 +13,11 @@ class PipeLine(models.Model):
     def __str__(self):
         return '{}: {} of {}'.format(self.pk, self.name, self.board)
 
+    # パイプライン新規作成
+    @classmethod
+    def create(cls, **params):
+        return cls.objects.create(**params)
+
     # Boardに紐づくものすべてのPipeLineを戻すメソッド
     @classmethod
     def get_list_by_board(cls, board):
@@ -25,3 +30,8 @@ class PipeLine(models.Model):
             return cls.objects.get(id=pipe_line_id)
         except cls.DoesNotExist:
             return None
+
+    # 新規追加時点のパイプラインの数取得
+    @classmethod
+    def get_current_pipe_line_count_by_board(cls, board):
+        return cls.objects.filter(board=board).count()

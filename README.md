@@ -161,3 +161,15 @@ Websocketの接続ごとに生成されるConsumerインスタンスはChannelLa
     Titleの更新だけは更新完了後に`dispatch('broadcastBoardData');`を
     呼び出して他のクライアントにボードデータの再取得を促している
 1. ( ___vuejs/src/pages/Board/Card/Show.vue___ ) ダブルクリックしたらフォーム出現する様に変更
+
+
+##### パイプラインの追加・更新
+
+1. ( ___modules/kanban/models/pipe_line.py___ ) パイプラインの新規作成(`create`)と追加時の数取得(`get_current_pipe_line_count_by_board`)
+1. ( ___modules/kanban/service.py___ ) 作成・更新・削除のAPI追加 `add_pipe_line`、`update_pipe_line`、`delete_pipe_line`
+    - `add_pipe_line`だけ、同じボードに所属しているパイプラインの数を取得した上でorder属性にセットすることで右端へのパイプライン追加を行っている
+    - CardモデルはPipeLineに対してのFK(外部キー)で`on_delete=models.CASCADE`を指定しているので紐づくPipeLineを削除するとあわせて削除される
+1. ( ___views/ws/kanban_consumer.py___ ) 必要なパラメータを受け取ってサービスメソッドを呼び出し、`broadcast_board_data`で全クライアントへ再取得を依頼
+1. ( ___vuejs/src/store/pages/board.js___ ) StoreにActionを追加 `addPipeLine`、`renamePipeLine`、`deletePipeLine`
+1. ( ___vuejs/src/pages/Board/components/BoardArea/AddPipeLine.vue___ ) カンバンの右端にパイプラインの追加用のボタン設置
+1. ( ___vuejs/src/pages/Board/components/BoardArea.vue___ ) AddPipeLineを組み込み

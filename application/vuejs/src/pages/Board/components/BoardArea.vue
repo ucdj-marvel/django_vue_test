@@ -14,6 +14,7 @@
         class="pipe-line-item"
         :key="pipeLine.id"
       />
+      <AddPipeLine />
     </Draggable>
     <router-view></router-view>
   </div>
@@ -26,6 +27,7 @@ import Draggable from 'vuedraggable';
 import { createNamespacedHelpers } from 'vuex';
 
 import PipeLine from './BoardArea/PipeLine.vue';
+import AddPipeLine from './BoardArea/AddPipeLine.vue';
 
 const { mapGetters } = createNamespacedHelpers('board');
 
@@ -35,6 +37,7 @@ export default {
   components: {
     Draggable,
     PipeLine,
+    AddPipeLine,
   },
   data() {
     return {
