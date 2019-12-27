@@ -60,8 +60,9 @@ class KanbanClient extends Client {
       boardName,
     });
   }
+  // カードの追加
   async addCard({ cardTitle, pipeLineId }) {
-    await this._post(`${this.baseUrl}/boards/`, {
+    await this._post(`${this.baseUrl}/cards/`, {
       cardTitle,
       pipeLineId,
     });

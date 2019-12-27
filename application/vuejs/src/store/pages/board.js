@@ -37,10 +37,14 @@ const actions = {
     });
     commit('updateCardOrder', { pipeLineId, cardList });
   },
-  async addCard({ commit }, { pipeLineId, cardTitle }) {
+  async addCard({ commit, getters }, { pipeLineId, cardTitle }) {
     await kanbanClient.addCard({
       pipeLineId,
       cardTitle,
+    });
+    const socket = getters.getSocket;
+    socket.sendObj({
+      type: 'broadcast_board_data',
     });
   },
 };
