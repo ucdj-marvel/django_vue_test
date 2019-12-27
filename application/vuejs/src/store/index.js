@@ -3,7 +3,7 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import createLogger from 'vuex/dist/logger';
 // module
-import header from './header';
+import header from './_layouts/header';
 import home from './pages/home';
 import board from './pages/board';
 

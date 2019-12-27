@@ -23,8 +23,15 @@ export default {
   },
   computed: {
     boardUrl() {
-      return `/boards/${this.boardId}`;
+      if (this.boardId !== null) {
+        return `/boards/${this.boardId}`;
+      }
+      return '#';
     },
   },
 };
 </script>
+
+<style scoped>
+
+</style>

@@ -2,11 +2,11 @@ import Vue from 'vue';
 import Router from 'vue-router';
 import WebSocketMiddleware from './middlewares/websocket';
 
-import DefaultLayout from '../components/layouts/DefaultLayout.vue';
+import DefaultLayout from '../pages/_layouts/DefaultLayout.vue';
 import NotFound from '../pages/NotFound.vue';
-import Home from '../pages/Home/Index.vue';
-import Board from '../pages/Board/Index.vue';
-import CardShow from '../pages/Board/Card/Show.vue';
+import Home from '../pages/Home.vue';
+import Board from '../pages/Board.vue';
+import CardShow from '../pages/components/Board/Card/Show.vue';
 
 
 Vue.use(Router);
@@ -18,7 +18,7 @@ const router = new Router({
     {
       path: '/',
       component: DefaultLayout,
-      // localhost:3000へのアクセスでHome/Index.vueが表示
+      // localhost:3000へのアクセスでHome.vueが表示
       children: [
         {
           path: '',

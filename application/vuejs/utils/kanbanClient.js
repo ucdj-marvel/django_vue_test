@@ -54,6 +54,11 @@ class KanbanClient extends Client {
     const response = await this._get(`${this.baseUrl}/boards/`);
     return response.data.boardList;
   }
+  // モーダルで表示するカードのAPI呼び出し
+  async getCardData({ boardId, cardId }) {
+    const response = await this._get(`${this.baseUrl}/boards/${boardId}/cards/${cardId}/`);
+    return response.data.cardData;
+  }
   // Boardの追加
   async addBoard({ boardName }) {
     await this._post(`${this.baseUrl}/boards/`, {
@@ -66,11 +71,6 @@ class KanbanClient extends Client {
       cardTitle,
       pipeLineId,
     });
-  }
-  // モーダルで表示するカードのAPI呼び出し
-  async getCardData({ boardId, cardId }) {
-    const response = await this._get(`${this.baseUrl}/boards/${boardId}/cards/${cardId}/`);
-    return response.data.cardData;
   }
   // カードの更新
   async updateCardData({

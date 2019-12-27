@@ -16,7 +16,7 @@ git clone https://github.com/gamogamola/django_vue_test.git
 cd django_vue_test
 pipenv install --python 3.6
 touch .env
-cd /app/application/vuejs
+cd /application/vuejs
 touch .env.vuejs
 cd
 ```
@@ -39,6 +39,9 @@ python wstest.py
 ```
 
 #### デバッグ
+* 新しいメソッドの実行結果確認
+    - Djangoではmanage.py shellで実装したメソッドなどが試せる
+    `$ docker-compose exec service ./manage.py shell` でコンテナに入り、`メソッド名`を実行
 * 動作がおかしい時
 ```
 docker-compose restart
@@ -119,7 +122,7 @@ Websocketの接続ごとに生成されるConsumerインスタンスはChannelLa
 1. フロント側からサーバサイドへアクセスする際に利用するAPIClient(KanbanClient)の`addCard`メソッドで`api/cards`にアクセス
     - ( ___vuejs/utils/kanbanClient.js___ ) `addCard({ cardTitle, pipeLineId })`
     - ( ___vuejs/src/store/pages/board.js___ ) `async addCard`
-    - ( ___vuejs/src/pages/Board/components/BoardArea/PipeLine.vue___ )
+    - ( ___vuejs/src/pages/Board/_components/BoardArea/PipeLine.vue___ )
 1. Card追加完了後にデータ再取得
     - ( ___views/ws/kanban_consumer.py___ ) `broadcast_board_data`というメッセージを
     サーバ側に送信することで同じボードを開いている全クライアントのデータが更新
@@ -133,7 +136,7 @@ Websocketの接続ごとに生成されるConsumerインスタンスはChannelLa
 
 1. BoardAreaコンポーネントの`<router-view>`でモーダルカンバンを画面上に表示
 1. ( ___vuejs/src/router/index.js___ ) でルーティング
-1. ( ___vuejs/src/pages/Board/components/BoardArea/Card.vue___ ) カードクリック時にURL書き換え
+1. ( ___vuejs/src/pages/Board/_components/BoardArea/Card.vue___ ) カードクリック時にURL書き換え
     - `($router.push)`URLを`boards/:boardId/cards/:cardId`に書き換え
 1. モーダルにデータを当てはめる処理(API)
     - ( ___vuejs/src/pages/Board/Card/Show.vue___ ) で`cardId`と`boardId`を`props`経由で受け取っている
@@ -171,5 +174,5 @@ Websocketの接続ごとに生成されるConsumerインスタンスはChannelLa
     - CardモデルはPipeLineに対してのFK(外部キー)で`on_delete=models.CASCADE`を指定しているので紐づくPipeLineを削除するとあわせて削除される
 1. ( ___views/ws/kanban_consumer.py___ ) 必要なパラメータを受け取ってサービスメソッドを呼び出し、`broadcast_board_data`で全クライアントへ再取得を依頼
 1. ( ___vuejs/src/store/pages/board.js___ ) StoreにActionを追加 `addPipeLine`、`renamePipeLine`、`deletePipeLine`
-1. ( ___vuejs/src/pages/Board/components/BoardArea/AddPipeLine.vue___ ) カンバンの右端にパイプラインの追加用のボタン設置
-1. ( ___vuejs/src/pages/Board/components/BoardArea.vue___ ) AddPipeLineを組み込み
+1. ( ___vuejs/src/pages/Board/_components/BoardArea/AddPipeLine.vue___ ) カンバンの右端にパイプラインの追加用のボタン設置
+1. ( ___vuejs/src/pages/Board/_components/BoardArea.vue___ ) AddPipeLineを組み込み

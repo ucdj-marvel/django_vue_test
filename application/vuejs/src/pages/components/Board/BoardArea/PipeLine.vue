@@ -7,7 +7,7 @@
               @dblclick="startPipeLineNameEdit">{{ pipeLineName }}</span>
         <span class="navbar-brand delete-pipe-line" data-toggle="tooltip" data-placement="top"
               title="delete pipeline" @click="delPipeLineAction">
-           Del
+          (-)
         </span>
       </span>
       <span v-show="isEditingPipeLineName">
@@ -25,6 +25,7 @@
     >
       <Card v-for="card in wrappedCardList"
             class="item"
+            v-show="card.isShown"
             :card="card"
             :key="card.cardId"
       />
@@ -33,11 +34,13 @@
 </template>
 
 <script>
+
 import { createNamespacedHelpers } from 'vuex';
 import Draggable from 'vuedraggable';
 import Card from './Card.vue';
 
 const { mapActions, mapGetters } = createNamespacedHelpers('board');
+
 
 export default {
   name: 'PipeLine',
@@ -45,8 +48,6 @@ export default {
     Draggable,
     Card,
   },
-  // パイプラインの1列を表現するデータを
-  // propsとして受け取り、それをもとに描画
   props: {
     pipeLine: {
       type: Object,
@@ -120,8 +121,6 @@ export default {
       // リネーム完了までのフラグ
       this.isWaitingRename = true;
     },
-    // VueDraggableはD&D終了時に、v-modelに指定したwrappedCardListのsetを呼び出す
-    // その中でupdateCardOrderを呼び出してやれば新しい並び順を渡すことができる
     ...mapActions([
       'updateCardOrder',
       'addCard',

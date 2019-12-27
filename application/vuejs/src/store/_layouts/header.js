@@ -2,7 +2,7 @@
 // Vueはあるコンポーネント内に閉じた状態であれば
 // そのコンポーネント内の変数として保持するだけでいいが
 // コンポーネントをまたがったりする場合にはStoreというものを用意して、それを参照する
-import KanbanClient from '../../utils/kanbanClient';
+import KanbanClient from '../../../utils/kanbanClient';
 
 // Storeはだいたい3つの要素を持つ
 

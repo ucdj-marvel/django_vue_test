@@ -1,5 +1,8 @@
+import _ from 'lodash';
 import camelcaseKeys from 'camelcase-keys';
+
 import kanbanClient from "../../../utils/kanbanClient";
+import router from '../../router';
 
 
 const state = {
@@ -7,6 +10,7 @@ const state = {
     pipeLineList: [],
   },
   focusedCard: {},  // 開いているカードの情報
+  searchWord: '',  // 検索ワード
 };
 
 // WebSocketへの接続のstate.socketはrootのStoreの属性なので
@@ -16,7 +20,25 @@ const getters = {
     return rootState.socket;
   },
   getFilteredPipeLineList(state) {
-    return state.boardData.pipeLineList;
+    const result = [];
+    state.boardData.pipeLineList.forEach(pipeline => {
+      const clonePipeLine = _.cloneDeep(pipeline);
+      clonePipeLine.cardList = clonePipeLine.cardList.map(card => {
+        const cloneCard = _.cloneDeep(card);
+        const content = cloneCard.content !== null ? cloneCard.content : '';
+        if (state.searchWord === null || state.searchWord === '') {
+          cloneCard.isShown = true;
+        } else {
+          cloneCard.isShown = (
+            cloneCard.title.toUpperCase().includes(state.searchWord.toUpperCase()) ||
+            content.toUpperCase().includes(state.searchWord.toUpperCase())
+          );
+        }
+        return cloneCard;
+      });
+      result.push(clonePipeLine);
+    });
+    return result;
   },
   getBoardId(state) {
     return state.boardData.boardId;
@@ -24,6 +46,9 @@ const getters = {
 };
 
 const actions = {
+  backToHome() {  // call from consumer
+    router.push('/');
+  },
   // ルーム内同期
   broadcastBoardData({ getters }) {
     const socket = getters.getSocket;
@@ -31,7 +56,9 @@ const actions = {
       type: 'broadcast_board_data',
     });
   },
-  // Consumerのupdate_card_orderをStoreから呼び出せるように定義
+  setSearchWord({ commit }, searchWord) {
+    commit('setSearchWord', searchWord);
+  },
   // 更新対象のpipeLineIdと新しい並び順になったカードの一覧をcardListとして受け取る
   updateCardOrder({ commit, getters }, { pipeLineId, cardList }) {
     console.log(pipeLineId, cardList);
@@ -45,12 +72,66 @@ const actions = {
     });
     commit('updateCardOrder', { pipeLineId, cardList });
   },
-  async addCard({ dispatch }, { pipeLineId, cardTitle }) {
-    await kanbanClient.addCard({
+  // パイプラインの並び替え
+  updatePipeLineOrder({ commit, getters }, { boardId, pipeLineList }) {
+    console.log(boardId, pipeLineList);
+    const socket = getters.getSocket;
+    socket.sendObj({
+      type: 'update_pipe_line_order',
+      boardId,
+      pipeLineIdList: pipeLineList.map(x => x.pipeLineId),
+    });
+    commit('updatePipeLineOrder', { pipeLineList });
+  },
+  renameBoard({ getters }, { boardId, boardName }) {
+    const socket = getters.getSocket;
+    socket.sendObj({
+      type: 'rename_board',
+      boardId,
+      boardName,
+    });
+  },
+  renamePipeLine({ getters }, { pipeLineId, pipeLineName }) {
+    const socket = getters.getSocket;
+    socket.sendObj({
+      type: 'rename_pipe_line',
+      pipeLineId,
+      pipeLineName,
+    });
+  },
+  addCard({ getters }, { pipeLineId, cardTitle }) {
+    console.log(pipeLineId, cardTitle);
+    const socket = getters.getSocket;
+    socket.sendObj({
+      type: 'add_card',
       pipeLineId,
       cardTitle,
     });
-    dispatch('broadcastBoardData');
+  },
+  addPipeLine({ getters }, { boardId, pipeLineName }) {
+    console.log(boardId, pipeLineName);
+    const socket = getters.getSocket;
+    socket.sendObj({
+      type: 'add_pipe_line',
+      boardId,
+      pipeLineName,
+    });
+  },
+  deleteBoard({ getters }, { boardId }) {
+    const socket = getters.getSocket;
+    socket.sendObj({
+      type: 'delete_board',
+      boardId,
+    });
+  },
+  deletePipeLine({ getters }, { boardId, pipeLineId }) {
+    console.log(boardId, pipeLineId);
+    const socket = getters.getSocket;
+    socket.sendObj({
+      type: 'delete_pipe_line',
+      boardId,
+      pipeLineId,
+    });
   },
   async fetchFocusedCard({ commit }, { boardId, cardId }) {
     const cardData = await kanbanClient.getCardData({ boardId, cardId });
@@ -82,47 +163,26 @@ const actions = {
     // カード自体はボード自体に出ているので他のクライアントへの反映を依頼する必要がある
     dispatch('broadcastBoardData');
   },
-  addPipeLine({ getters }, { boardId, pipeLineName }) {
-    console.log(boardId, pipeLineName);
-    const socket = getters.getSocket;
-    socket.sendObj({
-      type: 'add_pipe_line',
-      boardId,
-      pipeLineName,
-    });
-  },
-  renamePipeLine({ getters }, { pipeLineId, pipeLineName }) {
-    const socket = getters.getSocket;
-    socket.sendObj({
-      type: 'rename_pipe_line',
-      pipeLineId,
-      pipeLineName,
-    });
-  },
-  deletePipeLine({ getters }, { boardId, pipeLineId }) {
-    console.log(boardId, pipeLineId);
-    const socket = getters.getSocket;
-    socket.sendObj({
-      type: 'delete_pipe_line',
-      boardId,
-      pipeLineId,
-    });
-  },
 };
 
-// Consumerから戻されたボードのデータをしまうためのstate.boardDataと
-// 値をセットするためのsetBoardData mutationを定義
 const mutations = {
-  updateCardOrder(state, { pipeLineId, cardList }) { // あるPipeLine内の並びだけ更新する
-    const targetPipeLine = state.boardData.pipeLineList.find(pipeLine => pipeLine.pipeLineId === pipeLineId);
-    targetPipeLine.cardList = cardList;
-  },
   setBoardData(state, { boardData }) {
     // Pythonから来たデータをCamelCaseに変換
     state.boardData = camelcaseKeys(boardData, { deep: true });
   },
+  // あるPipeLine内の並びだけ更新する
+  updateCardOrder(state, { pipeLineId, cardList }) {
+    const targetPipeLine = state.boardData.pipeLineList.find(pipeLine => pipeLine.pipeLineId === pipeLineId);
+    targetPipeLine.cardList = cardList;
+  },
+  updatePipeLineOrder(state, { pipeLineList }) {
+    state.boardData.pipeLineList = pipeLineList;
+  },
   setFocusedCard(state, cardData) {
     state.focusedCard = cardData;
+  },
+  setSearchWord(state, searchWord) {
+    state.searchWord = searchWord;
   },
 };
 

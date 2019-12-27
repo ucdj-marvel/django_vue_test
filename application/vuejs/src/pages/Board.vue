@@ -6,8 +6,8 @@
 </template>
 
 <script>
-import MenuBar from '../../components/MenuBar.vue';
-import BoardArea from './components/BoardArea.vue';
+import MenuBar from './components/Board/MenuBar.vue';
+import BoardArea from './components/Board/BoardArea.vue';
 
 export default {
   name: 'Board',

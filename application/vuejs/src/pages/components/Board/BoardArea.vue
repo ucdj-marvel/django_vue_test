@@ -1,8 +1,5 @@
 <template>
   <div class="board-area">
-    <!-- Draggableのv-modelで指定した属性に対してsetterが呼び出されるため
-         mapStateでStoreのstateを直接使うのではなく、
-         setを定義したComputedを別で(wrappedPipeLineList)実装する必要がある -->
     <Draggable
       v-model="wrappedPipeLineList"
       class="board-container"
@@ -21,51 +18,53 @@
 </template>
 
 <script>
-// VueDraggableをインポート
-// これにより簡単に要素のドラッグアンドロップが実装できる
 import Draggable from 'vuedraggable';
 import { createNamespacedHelpers } from 'vuex';
 
 import PipeLine from './BoardArea/PipeLine.vue';
 import AddPipeLine from './BoardArea/AddPipeLine.vue';
 
-const { mapGetters } = createNamespacedHelpers('board');
-
+const { mapGetters, mapState, mapActions } = createNamespacedHelpers('board');
 
 export default {
   name: 'BoardArea',
   components: {
+    AddPipeLine,
     Draggable,
     PipeLine,
-    AddPipeLine,
+  },
+  computed: {
+    wrappedPipeLineList: {
+      get() {
+        return this.getFilteredPipeLineList;
+      },
+      set(value) {
+        console.log(value, this.boardData);
+        this.updatePipeLineOrder({
+          boardId: this.boardData.boardId,
+          pipeLineList: value,
+        });
+      },
+    },
+    ...mapGetters([
+      'getFilteredPipeLineList',
+    ]),
+    ...mapState([
+      'boardData',
+    ]),
+  },
+  methods: {
+    ...mapActions([
+      'updatePipeLineOrder',
+    ]),
   },
   data() {
     return {
-      // VueDraggableのオプション属性で
-      // draggableは指定したクラスをもった要素のみがドラッグ可能になる
-      // これでドラッグさせたくない要素との混合が可能に
       options: {
         animation: 300,
         draggable: '.pipe-line-item',
       },
     };
-  },
-  computed: {
-    wrappedPipeLineList: {
-      get() {
-        // ボードの構成情報はgetFilteredPipeLineListで取得
-        return this.getFilteredPipeLineList;
-      },
-      set(value) {
-        console.log('update', value);
-      },
-    },
-    ...mapGetters([
-      'getFilteredPipeLineList',
-      'getBoardId',
-    ]),
-  },
-  methods: {
   },
 };
 </script>
