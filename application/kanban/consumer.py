@@ -1,6 +1,6 @@
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
-from .service import service
+from .service import *
 
 
 class ConsumerException(Exception):
@@ -122,7 +122,7 @@ class KanbanConsumer(BaseJsonConsumer):
         )
         await self.accept()
         # ボードがあれば初期データを返送
-        if await database_sync_to_async(service.is_board_exist)(self.board_id):
+        if await database_sync_to_async(is_board_exist)(self.board_id):
             await self.send_board_data({})
         else:
             # 存在しないボードだった場合は、クライアントにリダイレクトを指示
@@ -136,7 +136,7 @@ class KanbanConsumer(BaseJsonConsumer):
         # requester_idが指定されている場合には、自身と一致した場合は返送しない
         if event.get('requester_id') == self.consumer_id:
             return
-        board_data = await database_sync_to_async(service.get_board_data_board_id)(self.board_id)
+        board_data = await database_sync_to_async(get_board_data_board_id)(self.board_id)
         await self.send_data({
             'boardData': board_data,
         }, mutation='setBoardData')
@@ -153,7 +153,7 @@ class KanbanConsumer(BaseJsonConsumer):
         """
         pipe_line_id = content['pipeLineId']
         card_id_list = content['cardIdList']
-        await database_sync_to_async(service.update_card_order)(pipe_line_id, card_id_list)
+        await database_sync_to_async(update_card_order)(pipe_line_id, card_id_list)
         await self.broadcast_board_data_without_requester()
 
     async def update_pipe_line_order(self, content):
@@ -167,7 +167,7 @@ class KanbanConsumer(BaseJsonConsumer):
         """
         board_id = content['boardId']
         pipe_line_id_list = content['pipeLineIdList']
-        await database_sync_to_async(service.update_pipe_line_order)(board_id, pipe_line_id_list)
+        await database_sync_to_async(update_pipe_line_order)(board_id, pipe_line_id_list)
         await self.broadcast_board_data_without_requester()
 
     async def add_pipe_line(self, content):
@@ -176,7 +176,7 @@ class KanbanConsumer(BaseJsonConsumer):
         """
         board_id = content['boardId']
         pipe_line_name = content['pipeLineName']
-        await database_sync_to_async(service.add_pipe_line)(board_id, pipe_line_name)
+        await database_sync_to_async(add_pipe_line)(board_id, pipe_line_name)
         await self.broadcast_board_data()
 
     async def add_card(self, content):
@@ -185,7 +185,7 @@ class KanbanConsumer(BaseJsonConsumer):
         """
         pipe_line_id = content['pipeLineId']
         card_title = content['cardTitle']
-        await database_sync_to_async(service.add_card)(pipe_line_id, card_title)
+        await database_sync_to_async(add_card)(pipe_line_id, card_title)
         await self.broadcast_board_data()
 
     async def rename_board(self, content):
@@ -196,7 +196,7 @@ class KanbanConsumer(BaseJsonConsumer):
         """
         board_id = content['boardId']
         board_name = content['boardName']
-        await database_sync_to_async(service.update_board)(board_id, board_name)
+        await database_sync_to_async(update_board)(board_id, board_name)
         await self.broadcast_board_data()
 
     async def rename_pipe_line(self, content):
@@ -205,7 +205,7 @@ class KanbanConsumer(BaseJsonConsumer):
         """
         pipe_line_id = content['pipeLineId']
         pipe_line_name = content['pipeLineName']
-        await database_sync_to_async(service.update_pipe_line)(pipe_line_id, pipe_line_name)
+        await database_sync_to_async(update_pipe_line)(pipe_line_id, pipe_line_name)
         await self.broadcast_board_data()
 
     async def delete_pipe_line(self, content):
@@ -216,7 +216,7 @@ class KanbanConsumer(BaseJsonConsumer):
         """
         board_id = content['boardId']
         pipe_line_id = content['pipeLineId']
-        await database_sync_to_async(service.delete_pipe_line)(pipe_line_id)
+        await database_sync_to_async(delete_pipe_line)(pipe_line_id)
         await self.broadcast_board_data()
 
     async def delete_board(self, content):
@@ -226,7 +226,7 @@ class KanbanConsumer(BaseJsonConsumer):
         :return:
         """
         board_id = content['boardId']
-        await database_sync_to_async(service.delete_board)(board_id)
+        await database_sync_to_async(delete_board)(board_id)
         await self.broadcast_delete_board()
 
     async def send_back_to_home(self, *args):

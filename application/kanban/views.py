@@ -7,7 +7,7 @@ from django.utils.decorators import method_decorator
 from django.views.generic import View, CreateView
 from django.contrib.auth.forms import UserCreationForm
 
-from .service as service
+from .service import *
 
 
 # CreateView...モデル(データ)の作成を簡単にしてくれる関数
@@ -60,7 +60,7 @@ class BoardListApi(BaseApiView):
         ボードの一覧を戻す
         """
         board_list = []
-        for board in service.get_board_list_by_owner(self.login_member):
+        for board in get_board_list_by_owner(self.login_member):
             board_list.append({
                 'id': board.id,
                 'name': board.name,
@@ -75,7 +75,7 @@ class BoardListApi(BaseApiView):
         """
         data = json.loads(request.body)
         board_name = data.get('boardName')
-        board = service.add_board(
+        board = add_board(
             owner=self.login_member,
             board_name=board_name
         )
@@ -94,7 +94,7 @@ class CardApi(BaseApiView):
         """
         カードを追加する
         """
-        card = service.get_card_by_card_id(card_id)
+        card = get_card_by_card_id(card_id)
 
         return JsonResponse({
             'card_data': {
@@ -111,7 +111,7 @@ class CardApi(BaseApiView):
         data = json.loads(request.body)
         title = data.get('title')
         content = data.get('content')
-        card = service.update_card(card_id=card_id, title=title, content=content)
+        card = update_card(card_id=card_id, title=title, content=content)
 
         return JsonResponse({
             'card_data': {
@@ -125,7 +125,7 @@ class CardApi(BaseApiView):
         """
         カードを削除する
         """
-        service.delete_card(card_id=card_id)
+        delete_card(card_id=card_id)
         return JsonResponse({
             'success': True
         })

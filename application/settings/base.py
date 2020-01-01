@@ -12,6 +12,10 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 
 import os
 import sys
+import environ
+
+env = environ.Env()
+env.read_env('.env')
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -22,7 +26,7 @@ sys.path.append(APP_ROOT_PATH)
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'my_secret_key.'
+SECRET_KEY = env('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -40,7 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'channels',
-    'kanban',
+    'application.kanban',
 ]
 
 MIDDLEWARE = [
@@ -128,7 +132,7 @@ STATIC_ROOT = os.path.join(APP_ROOT_PATH, 'static')
 
 
 # HTTPの起点を指定
-ROOT_URLCONF = 'application.views.urls'
+ROOT_URLCONF = 'application.kanban.urls'
 
 # login related
 LOGIN_REDIRECT_URL = '/'  # ログイン完了後のリダイレクト先
@@ -136,7 +140,7 @@ LOGIN_URL = '/accounts/login/'  # ログアウト後のリダイレクト先
 LOGOUT_REDIRECT_URL = '/'
 
 # ASGIの起点を指定
-ASGI_APPLICATION = 'views.routing.application'
+ASGI_APPLICATION = 'application.kanban.routing.application'
 
 # バックエンドをRedisにする
 CHANNEL_LAYERS = {
